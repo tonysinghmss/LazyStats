@@ -1,6 +1,9 @@
 package com.tony.lazystats;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.Image;
 import android.os.Bundle;
@@ -37,6 +40,7 @@ public class MasterActivity extends AppCompatActivity
     private GoogleApiClient mGoogleApiClient;
     private SharedPreferences sp;
     private SharedPreferences.Editor editor;
+    private BroadcastReceiver mSignOutReceiver;
 
     private String mUserName;
     private String mPhotoUrl;
@@ -49,6 +53,20 @@ public class MasterActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // [START Check for sign out broadcast.]
+        IntentFilter signOutFilter = new IntentFilter();
+        signOutFilter.addAction(getString(R.string.action_signout));
+        mSignOutReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(TAG, "Sign Out in progress.");
+                Intent signinIntent = new Intent(getApplicationContext(), SigninActivity.class);
+                startActivity(signinIntent);
+                finish();
+            }
+        };
+        registerReceiver(mSignOutReceiver, signOutFilter);
+        // [END Check for sign out broadcast.]
         setContentView(R.layout.activity_master);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -72,12 +90,6 @@ public class MasterActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        // [START GoogleApiClient]
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API)
-                .build();
-        // [END GoogleApiClient]
         sp = getSharedPreferences("lazystats@sharedPref",MODE_PRIVATE);
         editor = sp.edit();
 
@@ -110,6 +122,13 @@ public class MasterActivity extends AppCompatActivity
         }
     }
 
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        this.unregisterReceiver(mSignOutReceiver);
+    }
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -137,9 +156,7 @@ public class MasterActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         } else if (id == R.id.sign_out_menu ){
-            editor.remove("USER_ID");
-            editor.apply();
-            signOut();
+            signOutBroadCast();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -170,17 +187,18 @@ public class MasterActivity extends AppCompatActivity
         return true;
     }
 
-    private void signOut(){
-        if(mGoogleApiClient!=null && mGoogleApiClient.isConnected()) {
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                    new ResultCallback<Status>() {
-                        @Override
-                        public void onResult(Status status) {
-                            Intent i = new Intent(getApplicationContext(), SigninActivity.class);
-                            startActivity(i);
-                        }
-                    });
-        }
+    private void signOutBroadCast(){
+        // 1. Clear the shared preference.
+        editor.clear();
+        editor.apply();
+        // 2.Send a sign out broadcast
+        Intent broadCastIntent = new Intent();
+        broadCastIntent.setAction(getString(R.string.action_signout));
+        sendBroadcast(broadCastIntent);
+        // 3. Start the login Activity
+        Intent signinIntent = new Intent(this,SigninActivity.class);
+        startActivity(signinIntent);
+        finish();
     }
 
     @Override

@@ -90,7 +90,7 @@ public class MasterActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        sp = getSharedPreferences("lazystats@sharedPref",MODE_PRIVATE);
+        sp = getSharedPreferences(getString(R.string.user_cred_sp),MODE_PRIVATE);
         editor = sp.edit();
 
         if(!sp.contains("USER_ID")){
@@ -158,7 +158,10 @@ public class MasterActivity extends AppCompatActivity
         } else if (id == R.id.sign_out_menu ){
             signOutBroadCast();
             return true;
-        }
+        } /*else if (id == R.id.revoke_menu){
+            revokeAccessBroadCast();
+            return true;
+        }*/
         return super.onOptionsItemSelected(item);
     }
 
@@ -192,14 +195,20 @@ public class MasterActivity extends AppCompatActivity
         editor.clear();
         editor.apply();
         // 2.Send a sign out broadcast
-        Intent broadCastIntent = new Intent();
-        broadCastIntent.setAction(getString(R.string.action_signout));
-        sendBroadcast(broadCastIntent);
+        Intent signOutIntent = new Intent();
+        signOutIntent.setAction(getString(R.string.action_signout));
+        sendBroadcast(signOutIntent);
         // 3. Start the login Activity
         Intent signinIntent = new Intent(this,SigninActivity.class);
         startActivity(signinIntent);
         finish();
     }
+
+    /*private void revokeAccessBroadCast(){
+        Intent revokeIntent = new Intent();
+        revokeIntent.setAction(getString(R.string.action_revoke));
+        sendBroadcast(revokeIntent);
+    }*/
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {

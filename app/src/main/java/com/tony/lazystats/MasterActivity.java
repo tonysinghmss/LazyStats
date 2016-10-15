@@ -37,10 +37,15 @@ public class MasterActivity extends AppCompatActivity
 
     private static final String TAG = MasterActivity.class.getSimpleName();
 
-    private GoogleApiClient mGoogleApiClient;
     private SharedPreferences sp;
     private SharedPreferences.Editor editor;
+
     private BroadcastReceiver mSignOutReceiver;
+    private IntentFilter mSignOutFilter;
+
+    private IntentFilter mRevokeAccessFilter;
+    private BroadcastReceiver mRevokeAccessReceiver;
+
 
     private String mUserName;
     private String mPhotoUrl;
@@ -54,8 +59,8 @@ public class MasterActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // [START Check for sign out broadcast.]
-        IntentFilter signOutFilter = new IntentFilter();
-        signOutFilter.addAction(getString(R.string.action_signout));
+        mSignOutFilter = new IntentFilter();
+        mSignOutFilter.addAction(getString(R.string.action_signout));
         mSignOutReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -65,8 +70,22 @@ public class MasterActivity extends AppCompatActivity
                 finish();
             }
         };
-        registerReceiver(mSignOutReceiver, signOutFilter);
+        this.registerReceiver(mSignOutReceiver, mSignOutFilter);
         // [END Check for sign out broadcast.]
+
+        mRevokeAccessFilter = new IntentFilter();
+        mRevokeAccessFilter.addAction(getString(R.string.action_revoke));
+        mRevokeAccessReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(TAG, "Revoke access in progress.");
+                Intent revokeIntent = new Intent(getApplicationContext(), SigninActivity.class);
+                startActivity(revokeIntent);
+                finish();
+            }
+        };
+        this.registerReceiver(mRevokeAccessReceiver, mRevokeAccessFilter);
+
         setContentView(R.layout.activity_master);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -122,11 +141,17 @@ public class MasterActivity extends AppCompatActivity
         }
     }
 
+    /*@Override
+    protected void onResume(){
+        super.onResume();
+        this.registerReceiver(mSignOutReceiver, signOutFilter);
+    }*/
 
     @Override
-    protected void onPause(){
-        super.onPause();
+    protected void onDestroy(){
+        super.onDestroy();
         this.unregisterReceiver(mSignOutReceiver);
+        this.unregisterReceiver(mRevokeAccessReceiver);
     }
 
     @Override
@@ -158,10 +183,10 @@ public class MasterActivity extends AppCompatActivity
         } else if (id == R.id.sign_out_menu ){
             signOutBroadCast();
             return true;
-        } /*else if (id == R.id.revoke_menu){
+        } else if (id == R.id.revoke_menu){
             revokeAccessBroadCast();
             return true;
-        }*/
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -199,16 +224,21 @@ public class MasterActivity extends AppCompatActivity
         signOutIntent.setAction(getString(R.string.action_signout));
         sendBroadcast(signOutIntent);
         // 3. Start the login Activity
-        Intent signinIntent = new Intent(this,SigninActivity.class);
+        /*Intent signinIntent = new Intent(this,SigninActivity.class);
         startActivity(signinIntent);
-        finish();
+        finish();*/
     }
 
-    /*private void revokeAccessBroadCast(){
+    private void revokeAccessBroadCast(){
+        // 1. Clear the shared preference.
+        editor.clear();
+        editor.apply();
+        // 2.Send a revoke intent.
         Intent revokeIntent = new Intent();
         revokeIntent.setAction(getString(R.string.action_revoke));
         sendBroadcast(revokeIntent);
-    }*/
+        //signOutBroadCast();
+    }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {

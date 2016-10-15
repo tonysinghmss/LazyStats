@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -26,7 +27,8 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
-public class SigninActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
+public class SigninActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener,
+GoogleApiClient.ConnectionCallbacks{
 
     private static final String TAG = SigninActivity.class.getSimpleName();
     private static final int REQ_ACCPICK = 1;
@@ -36,9 +38,14 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
     private GoogleApiClient mGoogleApiClient;
     private SharedPreferences sp;
     private SharedPreferences.Editor editor;
-    //private BroadcastReceiver mRevokeAccessReceiver;
 
-    //private String mEmail;
+    private IntentFilter mSignOutFilter;
+    private BroadcastReceiver mSignOutReceiver;
+
+    private IntentFilter mRevokeAccessFilter;
+    private BroadcastReceiver mRevokeAccessReceiver;
+
+    private boolean isAccntConnected;
 
     private SignInButton btnSignIn;
     private ProgressDialog mProgressDialog;
@@ -46,18 +53,31 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        IntentFilter revokeAccessFilter = new IntentFilter();
-        revokeAccessFilter.addAction(getString(R.string.action_revoke));
-        /*mRevokeAccessReceiver = new BroadcastReceiver() {
+
+        mSignOutFilter = new IntentFilter();
+        mSignOutFilter.addAction(getString(R.string.action_signout));
+        mSignOutReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                signOutIfConnected();
+                Log.d(TAG, "Sign out complete.");
+            }
+        };
+        this.registerReceiver(mSignOutReceiver, mSignOutFilter);
+
+        mRevokeAccessFilter = new IntentFilter();
+        mRevokeAccessFilter.addAction(getString(R.string.action_revoke));
+        mRevokeAccessReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 Log.d(TAG,"Revoke access");
                 revokeAccess();
+                Log.d(TAG, "Complete access revoked.");
             }
         };
-        registerReceiver(mRevokeAccessReceiver, revokeAccessFilter);*/
+        this.registerReceiver(mRevokeAccessReceiver, mRevokeAccessFilter);
         // [START Sign out if connected.]
-        signOutIfConnected();
+        //signOutIfConnected();
         // [END Sign out if connected.]
         setContentView(R.layout.activity_signin);
         btnSignIn = (SignInButton) findViewById(R.id.btn_sign_in);
@@ -69,6 +89,7 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
                 .requestEmail()
                 .build();
         // [END Configure sign in]
+        isAccntConnected= false;
         // [START Build Google api client]
         /*mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, this)
@@ -84,10 +105,24 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
     }
 
     /*@Override
+    protected void onResume(){
+        super.onResume();
+        this.registerReceiver(mSignOutReceiver, mSignOutFilter);
+        this.registerReceiver(mRevokeAccessReceiver, mRevokeAccessFilter);
+    }*/
+
+    /*@Override
     protected void onPause(){
         super.onPause();
+        this.unregisterReceiver(mSignOutReceiver);
         this.unregisterReceiver(mRevokeAccessReceiver);
     }*/
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        this.unregisterReceiver(mSignOutReceiver);
+        this.unregisterReceiver(mRevokeAccessReceiver);
+    }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -216,19 +251,35 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
                         @Override
                         public void onResult(Status status) {
                             Log.d(TAG, "Sign Out using Google Api.");
+                            mGoogleApiClient.disconnect();
+                            isAccntConnected = false;
                         }
                     });
         }
     }
 
     private void revokeAccess(){
-        Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(Status status) {
-                        Log.d(TAG, "Revoke access using Google Api.");
-                    }
-                });
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && isAccntConnected == true) {
+
+            Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
+                    new ResultCallback<Status>() {
+                        @Override
+                        public void onResult(Status status) {
+                            Log.d(TAG, "Revoke access using Google Api.");
+                            signOutIfConnected();
+                        }
+                    });
+        }
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        this.isAccntConnected = true;
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
     }
 
     /*@Override

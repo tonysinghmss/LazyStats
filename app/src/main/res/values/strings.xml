@@ -13,6 +13,7 @@
     <string name="action_signout">com.tony.lazystats.ACTION_SIGNOUT</string>
     <string name="action_revoke">com.tony.lazystats.ACTION_REVOKE</string>
     <string name="user_cred_sp">com.tony.lazystats.USER_CREDS</string>
+    <string name="create">Create</string>
 
     <string name="profile_image">Profile Image</string>
 </resources>

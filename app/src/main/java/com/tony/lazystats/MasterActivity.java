@@ -1,5 +1,7 @@
 package com.tony.lazystats;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +28,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.tony.lazystats.fragments.CreateFragment;
 
 public class MasterActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
@@ -205,12 +208,16 @@ public class MasterActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_logout) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
+        Fragment fragment = null;
+        if (id == R.id.nav_create) {
+            // Handle creation of a new statistics
+            fragment = new CreateFragment();
+            //TODO: Code for CreateFragment
+        } else if (id == R.id.nav_list) {
+            // Show list of all statistics
+            //fragment = new ListFragment();
+            //TODO: Code for ListFragment
+        } /*else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
 
@@ -218,6 +225,12 @@ public class MasterActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_send) {
 
+        }*/
+
+        if(fragment != null){
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.frame_container, fragment).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

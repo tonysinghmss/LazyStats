@@ -13,9 +13,10 @@
 
     <ImageView
         android:id="@+id/ImageViewProfile"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/nav_header_vertical_spacing" />
+        android:layout_width="@dimen/nav_hdr_prof_img"
+        android:layout_height="@dimen/nav_hdr_prof_img"
+        android:paddingTop="@dimen/nav_header_vertical_spacing"
+        android:contentDescription="@string/profile_image"/>
 
     <TextView
         android:id="@+id/UserNameProfile"

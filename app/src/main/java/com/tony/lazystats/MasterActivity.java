@@ -124,13 +124,12 @@ public class MasterActivity extends AppCompatActivity
             profileEmailId.setText(mEmailId);
             profileImageView = (ImageView) headerView.findViewById(R.id.ImageViewProfile);
             if(mPhotoUrl!=null){
-                Glide.with(getApplicationContext()).load(mPhotoUrl)
+                Glide.with(this ).load(mPhotoUrl)
                         .thumbnail(0.5f)
                         .crossFade()
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .into(profileImageView);
             }
-            //TODO: The orientation of views and image is not proper
             // [END Set the navigation header details]
         }
     }
@@ -155,6 +154,7 @@ public class MasterActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+            signOutBroadCast();
         }
     }
 

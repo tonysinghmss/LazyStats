@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -92,6 +94,7 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
         btnSignIn.setScopes(mGoogleSignInOptions.getScopeArray());
 
         sp = getSharedPreferences(getString(R.string.user_cred_sp), MODE_PRIVATE);
+        //sp = PreferenceManager.getDefaultSharedPreferences(this);
         editor = sp.edit();
 
     }
@@ -116,9 +119,7 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
     @Override
     public void onStart() {
         super.onStart();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        if (isAccntConnected) {
+        if (!sp.getString("USER_ID","").isEmpty()) {
             OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
             if (opr.isDone()) {
                 //  If the user's cached credentials are valid, the OptionalPendingResult will be "done"
@@ -164,6 +165,12 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
 
     private void signOut() {
         if (mGoogleApiClient.isConnected()) {
+            //clear shared preferences
+            sp = getSharedPreferences(getString(R.string.user_cred_sp), MODE_PRIVATE);
+            editor = sp.edit();
+            editor.clear();
+            editor.commit();
+
             mGoogleApiClient.clearDefaultAccountAndReconnect();
             Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
                     new ResultCallback<Status>() {
@@ -179,7 +186,11 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
 
     private void revokeAccess() {
         if (isAccntConnected) {
-            //signOut();
+            //clear shared preferences
+            sp = getSharedPreferences(getString(R.string.user_cred_sp), MODE_PRIVATE);
+            editor = sp.edit();
+            editor.clear();
+            editor.commit();
             Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
                     new ResultCallback<Status>() {
                         @Override
@@ -221,13 +232,18 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
             //Log.d(TAG, "Account Profile URL: "+acct.getPhotoUrl().toString());
             String userId = acct.getId();
             String userDisplayName = acct.getDisplayName();
-            String userPhotoUrl = acct.getPhotoUrl().toString();
+            String userPhotoUrl = null;
+            if(acct.getPhotoUrl()!=null){
+                userPhotoUrl = acct.getPhotoUrl().toString();
+            }
             String userEmail = acct.getEmail();
 
             //Set the id in shared preferences so that it can be used to log out
             editor.putString("USER_ID", userId);
             editor.putString("USER_DISPLAY_NAME", userDisplayName);
-            editor.putString("USER_PIC_URL", userPhotoUrl);
+            if(userPhotoUrl!=null){
+                editor.putString("USER_PIC_URL", userPhotoUrl);
+            }
             editor.putString("USER_EMAIL", userEmail);
             editor.commit();
             //dataIntent.putExtra("USER_EMAIL",userEmail);

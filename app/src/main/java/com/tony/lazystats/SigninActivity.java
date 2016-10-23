@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -14,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -49,6 +51,7 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
     private SignInButton btnSignIn;
     private ProgressDialog mProgressDialog;
 
+    private Boolean exit = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -282,6 +285,24 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
     @Override
     public void onConnectionSuspended(int i) {
         Log.d(TAG, "Connection Suspended.");
+    }
+
+    @Override
+    public void onBackPressed(){
+        if(exit){
+            super.onBackPressed();
+            finish();
+        }
+        else {
+            Toast.makeText(this, "Press back again to exit.",Toast.LENGTH_SHORT).show();
+            exit = true;
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    exit = false;
+                }
+            },3*1000);
+        }
     }
 
 }

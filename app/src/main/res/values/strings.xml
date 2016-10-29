@@ -13,7 +13,11 @@
     <string name="action_signout">com.tony.lazystats.ACTION_SIGNOUT</string>
     <string name="action_revoke">com.tony.lazystats.ACTION_REVOKE</string>
     <string name="user_cred_sp">com.tony.lazystats.USER_CREDS</string>
-    <string name="create">Create</string>
 
+    <string name="create">Create</string>
+    <string name="txtName">Name</string>
+    <string name="hintStatName">Enter a name</string>
+    <string name="txtRemark">Remark</string>
+    <string name="hintStatRemark">Enter a remark</string>
     <string name="profile_image">Profile Image</string>
 </resources>

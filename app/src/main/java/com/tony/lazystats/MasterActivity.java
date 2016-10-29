@@ -2,6 +2,7 @@ package com.tony.lazystats;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +30,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.tony.lazystats.fragments.CreateFragment;
+import com.tony.lazystats.fragments.DefaultFragment;
 
 public class MasterActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
@@ -138,6 +140,8 @@ public class MasterActivity extends AppCompatActivity
             }
             // [END Set the navigation header details]
         }
+        FragmentTransaction tx = getFragmentManager().beginTransaction();
+        tx.replace(R.id.frame_container, new DefaultFragment()).commit();
     }
 
     /*@Override

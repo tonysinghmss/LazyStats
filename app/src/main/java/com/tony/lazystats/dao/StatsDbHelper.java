@@ -8,12 +8,21 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by tony on 29/10/16.
  */
 
-public class StatCreationDbHelper extends SQLiteOpenHelper {
+public class StatsDbHelper extends SQLiteOpenHelper {
     // Increment db version by one if you change the database schema
     public static final int DATABASE_VERSION = 1;
 
-    public StatCreationDbHelper(Context context){
+    public static StatsDbHelper instance;
+
+    private StatsDbHelper(Context context){
         super(context,LazyStatsContract.DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    public static StatsDbHelper getInstance(Context context){
+        if(instance == null){
+            instance = new StatsDbHelper(context.getApplicationContext());
+        }
+        return instance;
     }
 
     @Override

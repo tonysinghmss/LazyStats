@@ -20,4 +20,5 @@
     <string name="txtRemark">Remark</string>
     <string name="hintStatRemark">Enter a remark</string>
     <string name="profile_image">Profile Image</string>
+    <string name="action_createStats">com.tony.lazystats.ACTION_CREATESTATS</string>
 </resources>

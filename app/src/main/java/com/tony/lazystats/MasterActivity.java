@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -46,6 +47,7 @@ public class MasterActivity extends AppCompatActivity
     private IntentFilter mRevokeAccessFilter;
     private BroadcastReceiver mRevokeAccessReceiver;
 
+    private DatabaseOperation mDatabaseOperation = new DatabaseOperation();
 
     private String mUserName;
     private String mPhotoUrl;
@@ -61,6 +63,7 @@ public class MasterActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // [START Check for sign out broadcast.]
+
         mSignOutFilter = new IntentFilter();
         mSignOutFilter.addAction(getString(R.string.action_signout));
         mSignOutReceiver = new BroadcastReceiver() {
@@ -142,6 +145,10 @@ public class MasterActivity extends AppCompatActivity
         }
         FragmentTransaction tx = getFragmentManager().beginTransaction();
         tx.replace(R.id.frame_container, new DefaultFragment()).commit();
+
+        //Filter for creation of new stats in database.
+        IntentFilter mCreateStatsFilter = new IntentFilter(getString(R.string.action_createStats));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mDatabaseOperation,mCreateStatsFilter);
     }
 
     /*@Override
@@ -155,6 +162,8 @@ public class MasterActivity extends AppCompatActivity
         super.onDestroy();
         this.unregisterReceiver(mSignOutReceiver);
         this.unregisterReceiver(mRevokeAccessReceiver);
+        //Unregister DatabaseOperations.
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mDatabaseOperation);
     }
 
     @Override
@@ -270,5 +279,18 @@ public class MasterActivity extends AppCompatActivity
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed: "+ connectionResult);
+    }
+
+    private class DatabaseOperation extends BroadcastReceiver{
+        public DatabaseOperation(){
+            super();
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //TODO: Write code for each database action recieved from each child fragment.
+        }
+
+
     }
 }

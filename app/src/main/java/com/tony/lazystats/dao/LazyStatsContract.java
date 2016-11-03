@@ -1,5 +1,6 @@
 package com.tony.lazystats.dao;
 
+import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
@@ -9,31 +10,24 @@ import android.provider.BaseColumns;
 public class LazyStatsContract {
     private LazyStatsContract(){}
 
-    private static final String COMMA_SEP = ",";
-    private static final String CREATE_TABLE = "CREATE TABLE ";
+    public static final String DATABASE_NAME = "LazyStatsDatabase";
+    public static final int DATABASE_VERSION = 1;
 
-    public static final String DATABASE_NAME = "LazyStats.db";
+    public static final String SCHEME = "content";
+    // The provider's authority
+    public static final String AUTHORITY = "com.tony.lazystats";
 
-    public static class StatCreation implements BaseColumns{
-        public static final String TABLE_NAME = "statistics";
+    public static class Statistics implements BaseColumns{
+        public static final String TABLE_NAME = "Statistics";
         public static final String COL_NAME = "statName";
-        public static final String COL_CREATED_BY = "createdBy";// userId of the user
         public static final String COL_REMARK = "remark";
         public static final String COL_TYPE = "type";
+        public static final String COL_CREATED_BY = "createdBy";// userId of the user
         public static final String COL_CREATED_ON = "createdOn";
+        public static final Uri CONTENT_URI = Uri.parse(SCHEME + "://" + AUTHORITY+"/"+TABLE_NAME);
+        public static final String MIME_TYPE_ROWS =
+                "vnd.android.cursor.dir/vnd.com.tony.lazystats.Statistics";
+        public static final String MIME_TYPE_SINGLE_ROW =
+                "vnd.android.cursor.item/vnd.com.tony.lazystats.Statistics";
     }
-    public static final String SQL_CREATE_STATS =
-            CREATE_TABLE + StatCreation.TABLE_NAME + "(" +
-                    StatCreation._ID + " INTEGER PRIMARY KEY"+ COMMA_SEP+
-                    StatCreation.COL_NAME + " TEXT UNIQUE NOT NULL"+ COMMA_SEP+
-                    StatCreation.COL_REMARK + " TEXT"+ COMMA_SEP+
-                    StatCreation.COL_TYPE + " TEXT"+ COMMA_SEP+
-                    StatCreation.COL_CREATED_BY + " TEXT"+ COMMA_SEP+
-                    StatCreation.COL_CREATED_ON + " TEXT"+")";
-    public static final String SQL_DROP_STATS =
-            "DROP TABLE IF EXISTS "+StatCreation.TABLE_NAME;
-    /*private static final String SQL_INSERT_STATS =
-            "INSERT INTO TABLE "+StatCreation.TABLE_NAME;*/
-    /*private static final String SQL_DELETE_STATS =
-            "DELETE FROM "+StatCreation.TABLE_NAME;*/
 }

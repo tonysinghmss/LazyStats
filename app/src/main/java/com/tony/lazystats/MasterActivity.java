@@ -224,8 +224,10 @@ public class MasterActivity extends AppCompatActivity
         Fragment fragment = null;
         if (id == R.id.nav_create) {
             // Handle creation of a new statistics
+            Bundle userDetail = new Bundle();
+            userDetail.putString("USER_ID", sp.getString("USER_ID",mEmailId));
             fragment = new CreateFragment();
-            //TODO: Code for CreateFragment
+            fragment.setArguments(userDetail);
         } else if (id == R.id.nav_list) {
             // Show list of all statistics
             //fragment = new ListFragment();

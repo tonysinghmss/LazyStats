@@ -1,4 +1,4 @@
-package com.tony.lazystats.dao;
+package com.tony.lazystats.contract;
 
 import android.net.Uri;
 import android.provider.BaseColumns;
@@ -15,7 +15,7 @@ public class LazyStatsContract {
 
     public static final String SCHEME = "content";
     // The provider's authority
-    public static final String AUTHORITY = "com.tony.lazystats";
+    public static final String AUTHORITY = "com.tony.lazystats.provider";
 
     public static class Statistics implements BaseColumns{
         public static final String TABLE_NAME = "Statistics";
@@ -26,8 +26,8 @@ public class LazyStatsContract {
         public static final String COL_CREATED_ON = "createdOn";
         public static final Uri CONTENT_URI = Uri.parse(SCHEME + "://" + AUTHORITY+"/"+TABLE_NAME);
         public static final String MIME_TYPE_ROWS =
-                "vnd.android.cursor.dir/vnd.com.tony.lazystats.Statistics";
+                "vnd.android.cursor.dir/vnd.com.tony.lazystats.provider.Statistics";
         public static final String MIME_TYPE_SINGLE_ROW =
-                "vnd.android.cursor.item/vnd.com.tony.lazystats.Statistics";
+                "vnd.android.cursor.item/vnd.com.tony.lazystats.provider.Statistics";
     }
 }

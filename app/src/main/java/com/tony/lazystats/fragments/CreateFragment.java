@@ -1,43 +1,35 @@
 package com.tony.lazystats.fragments;
 
 import android.app.Fragment;
-import android.app.LoaderManager;
-import android.content.CursorLoader;
-import android.content.Intent;
-import android.content.Loader;
-import android.database.Cursor;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.tony.lazystats.R;
-import com.tony.lazystats.dao.LazyStatsContract;
+import com.tony.lazystats.contract.LazyStatsContract;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by tony on 23/10/16.
  */
 
-public class CreateFragment extends Fragment implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor>{
+public class CreateFragment extends Fragment implements View.OnClickListener{
     private static final String TAG = CreateFragment.class.getSimpleName();
-    private static final int CREATE_URL_LOADER = 100;
 
     private EditText mStatName;
     private EditText mStatRemark;
+    private String mStatCreatedBy;
 
-    private static final String[] PROJECTION =
-            {
-                    LazyStatsContract.Statistics._ID,
-                    LazyStatsContract.Statistics.COL_NAME,
-                    LazyStatsContract.Statistics.COL_REMARK,
-                    LazyStatsContract.Statistics.COL_CREATED_BY,
-                    LazyStatsContract.Statistics.COL_CREATED_ON
-            };
     public CreateFragment(){
         //Empty public constructor
     }
@@ -49,7 +41,7 @@ public class CreateFragment extends Fragment implements View.OnClickListener, Lo
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
-
+        mStatCreatedBy = getArguments().getString("USER_ID");
         return inflater.inflate(R.layout.fragment_create, container, false);
     }
 
@@ -67,72 +59,23 @@ public class CreateFragment extends Fragment implements View.OnClickListener, Lo
         Log.d(TAG, "Create stats button clicked.");
         Editable statName = mStatName.getText();
         Editable statRemark = mStatRemark.getText();
-        Bundle fields = new Bundle();
-        fields.putString("stat_name",statName.toString());
-        fields.putString("stat_remark",statRemark.toString());
-        // Restart the CursorLoader
-        getLoaderManager().restartLoader(CREATE_URL_LOADER, fields, this);
-        // Step1 : Open database and check the name
-        // If name exists show a dialog else save the name and rest all details
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int loaderID, Bundle args) {
-        switch (loaderID){
-            case CREATE_URL_LOADER:
-                return new CursorLoader(getActivity(),
-                        LazyStatsContract.Statistics.CONTENT_URI,
-                        PROJECTION,
-                        null,
-                        null,
-                        null);
-            default:
-                return null;
-
+        ContentValues fields = new ContentValues();
+        fields.put(LazyStatsContract.Statistics.COL_NAME, statName.toString());
+        fields.put(LazyStatsContract.Statistics.COL_REMARK, statRemark.toString());
+        // Type of statistics will change in future to SHAREABLE or PERSONAL
+        // based on the drop down selected by the user.
+        fields.put(LazyStatsContract.Statistics.COL_TYPE, "PERSONAL");
+        fields.put(LazyStatsContract.Statistics.COL_CREATED_BY, mStatCreatedBy);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date();
+        fields.put(LazyStatsContract.Statistics.COL_CREATED_ON, dateFormat.format(date));
+        try {
+            getActivity().getContentResolver().insert(ContentUris.withAppendedId(LazyStatsContract.Statistics.CONTENT_URI, 1), fields);
+        }catch (SQLiteException e){
+            Toast.makeText(getActivity(), "This statistics already exists. Try a new name.", Toast.LENGTH_SHORT).show();
+        }
+        catch (UnsupportedOperationException ex){
+            Toast.makeText(getActivity(), "You cannot perform this operation.", Toast.LENGTH_SHORT).show();
         }
     }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
-    }
-
-    /*
-    * Callback that's invoked when the system has initialized the Loader and
-    * is ready to start the query. This usually happens when initLoader() is
-    * called. The loaderID argument contains the ID value passed to the
-    * initLoader() call.
-    */
-    /*@Override
-    public Loader<Cursor> onCreateLoader(int loaderID, Bundle bundle){
-       switch (loaderID){
-           case CREATE_URL_LOADER:
-               return new CursorLoader(
-                       getActivity(),                               //Parent activity context
-                       LazyStatsContract.StatCreation.TABLE_NAME,   //Table to query
-                       null,     // Projection to return
-                       null,            // No selection clause
-                       null,            // No selection arguments
-                       null             // Default sort order
-               );
-           default:
-               // An invalid id was passed in
-               return null;
-       }
-    }*/
-    /*
-    Fragment loads LoaderManager –>
-    LoaderManager makes a query to ContentProvider –>
-    ContentProvider takes instance of DbConnection –>
-    DbConnection opens a connection to SQLiteDatabase –>
-    SQLiteDatabase initializes SQLiteOpenHelper, creates database if necessary, executes the queries and get Cursor as result –>
-    The Cursor will be pushed back to LoaderManager –>
-    LoaderManager notifies Activity for showing data.
-*/
-
 }

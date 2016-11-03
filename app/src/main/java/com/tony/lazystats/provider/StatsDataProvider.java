@@ -1,4 +1,4 @@
-package com.tony.lazystats.dao;
+package com.tony.lazystats.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -6,12 +6,14 @@ import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
+
+import com.tony.lazystats.contract.LazyStatsContract;
 
 /**
  * Created by TONY on 11/3/2016.
@@ -19,8 +21,8 @@ import android.util.SparseArray;
 
 public class StatsDataProvider extends ContentProvider{
     // Indicates that the incoming query is for Stat creation
-    public static final int QUERY_STATS = 1;
-    public static final int INSERT_STATS = 2;
+    public static final int MULTIROW_STATS = 1;
+    public static final int UNIROW_STATS = 2;
     public static final int INVALID_URI = -1;
 
     private static final String COMMA_SEP = ",";
@@ -64,26 +66,26 @@ public class StatsDataProvider extends ContentProvider{
          */
         sMimeTypes = new SparseArray<>();
 
-        // Adds a URI "match" entry that maps create Statistics URIs to a numeric code
+        // Sets up MULTIROW_STATS as code to represent URI for multiple rows of Statistics table
         sUriMatcher.addURI(
                 LazyStatsContract.AUTHORITY,
                 LazyStatsContract.Statistics.TABLE_NAME,
-                QUERY_STATS);
-
+                MULTIROW_STATS);
+        // Sets up UNIROW_STATS as code to represent URI for single row of Statistics table
         sUriMatcher.addURI(
                 LazyStatsContract.AUTHORITY,
-                LazyStatsContract.Statistics.TABLE_NAME,
-                INSERT_STATS);
+                LazyStatsContract.Statistics.TABLE_NAME+"/#",
+                UNIROW_STATS);
 
-        // Specifies a custom MIME type for a single row of Statistics table
+        // Specifies a custom MIME type for a multiple rows of Statistics table
         sMimeTypes.put(
-                QUERY_STATS,
+                MULTIROW_STATS,
                 "vnd.android.cursor.dir/vnd." +
                         LazyStatsContract.AUTHORITY + "." +
                         LazyStatsContract.Statistics.TABLE_NAME);
-
+        // Specifies a custom MIME type for a single row of Statistics table
         sMimeTypes.put(
-                INSERT_STATS,
+                UNIROW_STATS,
                 "vnd.android.cursor.item/vnd." +
                         LazyStatsContract.AUTHORITY + "." +
                         LazyStatsContract.Statistics.TABLE_NAME);
@@ -175,15 +177,24 @@ public class StatsDataProvider extends ContentProvider{
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteDatabase db = mHelper.getReadableDatabase();
         switch (sUriMatcher.match(uri)){
-            case QUERY_STATS:
-                return db.query(LazyStatsContract.Statistics.TABLE_NAME,
-                        projection,selection,selectionArgs,null,null,sortOrder);
-            case INSERT_STATS:
-                throw new IllegalArgumentException("Query -- Invalid URI:" + uri);
-            case INVALID_URI:
+            case MULTIROW_STATS:
+                if(TextUtils.isEmpty(sortOrder)) sortOrder = "_ID ASC";
+                break;
+            case UNIROW_STATS:
+                selection = selection + "_ID = "+uri.getLastPathSegment();
+                break;
+            default:
                 throw new IllegalArgumentException("Query -- Invalid URI:" + uri);
         }
-        return null;
+        return db.query(
+                LazyStatsContract.Statistics.TABLE_NAME,    //Table name
+                projection,                                 //Columns to be shown
+                selection,                                  //Filter clause
+                selectionArgs,                              //Filter arguments
+                null,                                       //group by clause
+                null,                                       //having clause
+                sortOrder                                   //order by clause
+        );
     }
 
     /**
@@ -202,14 +213,14 @@ public class StatsDataProvider extends ContentProvider{
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         switch (sUriMatcher.match(uri)){
-            case INSERT_STATS:
+            case UNIROW_STATS:
                 // Creates a writeable database or gets one from cache
                 SQLiteDatabase localSQLiteDatabase = mHelper.getWritableDatabase();
 
                 // Inserts the row into the table and returns the new row's _id value
-                long id = localSQLiteDatabase.insert(
+                long id = localSQLiteDatabase.insertOrThrow(
                         LazyStatsContract.Statistics.TABLE_NAME,
-                        LazyStatsContract.Statistics.COL_CREATED_BY,//null column hack
+                        LazyStatsContract.Statistics.COL_REMARK,//null column hack
                         values
                 );
                 // If the insert succeeded, notify a change and return the new row's content URI.
@@ -217,9 +228,9 @@ public class StatsDataProvider extends ContentProvider{
                     getContext().getContentResolver().notifyChange(uri, null);
                     return Uri.withAppendedPath(uri, Long.toString(id));
                 } else {
-                    throw new SQLiteException("Insert error:" + uri);
+                    throw new UnsupportedOperationException("Failed to insert:" + uri);
                 }
-            case QUERY_STATS:
+            case MULTIROW_STATS:
                 throw new IllegalArgumentException("Insert: Invalid URI" + uri);
         }
         return null;
@@ -233,9 +244,9 @@ public class StatsDataProvider extends ContentProvider{
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         switch (sUriMatcher.match(uri)){
-            case QUERY_STATS:
+            case MULTIROW_STATS:
                 throw new IllegalArgumentException("Update: Invalid URI: " + uri);
-            case INSERT_STATS:
+            case UNIROW_STATS:
                 throw new IllegalArgumentException("Update: Invalid URI: " + uri);
         }
         return -1;

@@ -47,7 +47,7 @@ public class MasterActivity extends AppCompatActivity
     private IntentFilter mRevokeAccessFilter;
     private BroadcastReceiver mRevokeAccessReceiver;
 
-    private DatabaseOperation mDatabaseOperation = new DatabaseOperation();
+    //private DatabaseOperation mDatabaseOperation = new DatabaseOperation();
 
     private String mUserName;
     private String mPhotoUrl;
@@ -148,7 +148,7 @@ public class MasterActivity extends AppCompatActivity
 
         //Filter for creation of new stats in database.
         IntentFilter mCreateStatsFilter = new IntentFilter(getString(R.string.action_createStats));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mDatabaseOperation,mCreateStatsFilter);
+        //LocalBroadcastManager.getInstance(this).registerReceiver(mDatabaseOperation,mCreateStatsFilter);
     }
 
     /*@Override
@@ -163,7 +163,7 @@ public class MasterActivity extends AppCompatActivity
         this.unregisterReceiver(mSignOutReceiver);
         this.unregisterReceiver(mRevokeAccessReceiver);
         //Unregister DatabaseOperations.
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mDatabaseOperation);
+        //LocalBroadcastManager.getInstance(this).unregisterReceiver(mDatabaseOperation);
     }
 
     @Override
@@ -280,7 +280,7 @@ public class MasterActivity extends AppCompatActivity
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed: "+ connectionResult);
     }
-
+/*
     private class DatabaseOperation extends BroadcastReceiver{
         public DatabaseOperation(){
             super();
@@ -292,5 +292,5 @@ public class MasterActivity extends AppCompatActivity
         }
 
 
-    }
+    }*/
 }

@@ -72,7 +72,7 @@ public class CreateFragment extends Fragment implements View.OnClickListener{
         try {
             getActivity().getContentResolver().insert(ContentUris.withAppendedId(LazyStatsContract.Statistics.CONTENT_URI, 1), fields);
         }catch (SQLiteException e){
-            Toast.makeText(getActivity(), "This statistics already exists. Try a new name.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "This statistics already exists!! Try with a new name.", Toast.LENGTH_SHORT).show();
         }
         catch (UnsupportedOperationException ex){
             Toast.makeText(getActivity(), "You cannot perform this operation.", Toast.LENGTH_SHORT).show();

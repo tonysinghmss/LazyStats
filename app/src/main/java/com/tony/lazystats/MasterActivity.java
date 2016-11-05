@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -32,9 +31,12 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.tony.lazystats.fragments.CreateFragment;
 import com.tony.lazystats.fragments.DefaultFragment;
+import com.tony.lazystats.fragments.StatListFragment;
+import com.tony.lazystats.model.Statistic;
 
 public class MasterActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener,
+        StatListFragment.OnListFragmentInteractionListener{
 
     private static final String TAG = MasterActivity.class.getSimpleName();
 
@@ -230,8 +232,7 @@ public class MasterActivity extends AppCompatActivity
             fragment.setArguments(userDetail);
         } else if (id == R.id.nav_list) {
             // Show list of all statistics
-            //fragment = new ListFragment();
-            //TODO: Code for ListFragment
+            fragment =  StatListFragment.newInstance(1);
         } /*else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
@@ -282,17 +283,10 @@ public class MasterActivity extends AppCompatActivity
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed: "+ connectionResult);
     }
-/*
-    private class DatabaseOperation extends BroadcastReceiver{
-        public DatabaseOperation(){
-            super();
-        }
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            //TODO: Write code for each database action recieved from each child fragment.
-        }
+    @Override
+    public void onStatListFragmentInteraction(Statistic item){
 
+    }
 
-    }*/
 }

@@ -20,6 +20,7 @@ import com.tony.lazystats.contract.LazyStatsContract;
  */
 
 public class StatsDataProvider extends ContentProvider{
+    public static final String LOG_TAG = StatsDataProvider.class.getSimpleName();
     // Indicates that the incoming query is for Stat creation
     public static final int MULTIROW_STATS = 1;
     public static final int UNIROW_STATS = 2;
@@ -175,6 +176,7 @@ public class StatsDataProvider extends ContentProvider{
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        Log.d(LOG_TAG, "Inside StatsDataProvider query");
         SQLiteDatabase db = mHelper.getReadableDatabase();
         switch (sUriMatcher.match(uri)){
             case MULTIROW_STATS:
@@ -212,6 +214,7 @@ public class StatsDataProvider extends ContentProvider{
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues values) {
+        Log.d(LOG_TAG, "Inside StatsDataProvider insert");
         switch (sUriMatcher.match(uri)){
             case UNIROW_STATS:
                 // Creates a writeable database or gets one from cache
@@ -225,6 +228,7 @@ public class StatsDataProvider extends ContentProvider{
                 );
                 // If the insert succeeded, notify a change and return the new row's content URI.
                 if (-1 != id) {
+                    Log.d(LOG_TAG, "Row inserted with id :"+id);
                     getContext().getContentResolver().notifyChange(uri, null);
                     return Uri.withAppendedPath(uri, Long.toString(id));
                 } else {

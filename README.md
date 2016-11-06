@@ -8,7 +8,9 @@ Till now I have implemented creation and visualization of the list of statistics
 Lots of things are pending and need to be done. I will update it as and when I find time.
 
 Below is the list of components I have used till now in this app:
-Navigation Drawer Activity along with Fragments.
-LoaderManager callbacks with CursorLoader.
-RecyclerView Adapter.
-Content Provider.
+<ul>
+<li>Navigation Drawer Activity along with Fragments.</li>
+<li>LoaderManager callbacks with CursorLoader.</li>
+<li>RecyclerView Adapter.</li>
+<li>Content Provider.</li>
+</ul>

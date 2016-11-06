@@ -16,11 +16,11 @@ import java.util.List;
 public class StatListRecyclerViewAdapter extends RecyclerView.Adapter<StatListRecyclerViewAdapter.ViewHolder> {
 
     private final List<Statistic> mValues;
-    private final StatListFragment.OnListFragmentInteractionListener mListener;
+    private final StatListFragment.OnStatListInteractionListener mListener;
     private static final int ITEM_DETAIL = 1;
     private static final int DELETE_ITEM = 2;
 
-    public StatListRecyclerViewAdapter(List<Statistic> items, StatListFragment.OnListFragmentInteractionListener listener) {
+    public StatListRecyclerViewAdapter(List<Statistic> items, StatListFragment.OnStatListInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }

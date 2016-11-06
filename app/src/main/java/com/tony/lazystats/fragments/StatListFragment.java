@@ -28,7 +28,7 @@ public class StatListFragment extends Fragment implements LoaderManager.LoaderCa
     private static final String ARG_COLUMN_COUNT = "column-count";
     private int mColumnCount = 1;
     private List<Statistic> mStatList = new ArrayList<>();
-    private OnListFragmentInteractionListener mListener;
+    private OnStatListInteractionListener mListener;
     private StatListRecyclerViewAdapter mRecyclerViewAdapter;
 
     /**
@@ -83,8 +83,8 @@ public class StatListFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
+        if (context instanceof OnStatListInteractionListener) {
+            mListener = (OnStatListInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnStatListFragmentInteractionListener");
@@ -107,7 +107,7 @@ public class StatListFragment extends Fragment implements LoaderManager.LoaderCa
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnListFragmentInteractionListener {
+    public interface OnStatListInteractionListener {
         void onStatListFragmentInteraction(Statistic item, int clickId);
     }
 
@@ -124,7 +124,8 @@ public class StatListFragment extends Fragment implements LoaderManager.LoaderCa
         Log.d(LOG_TAG, "Inside onCreateLoader");
         switch (loaderId) {
             case 1:
-                return new CursorLoader(getActivity(), LazyStatsContract.Statistics.CONTENT_URI,
+                return new CursorLoader(getActivity(),
+                        LazyStatsContract.Statistics.CONTENT_URI,
                         STAT_LIST_PROJECTION,               // List of columns to fetch
                         null,                               // Filter clauses
                         null,                               // Filter args

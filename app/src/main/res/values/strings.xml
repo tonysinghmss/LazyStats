@@ -23,4 +23,6 @@
     <string name="action_createStats">com.tony.lazystats.ACTION_CREATESTATS</string>
 
     <string name="authority">com.tony.lazystats.provider</string>
+    <string name="register">Register</string>
+    <string name="dataValue">Data Value</string>
 </resources>

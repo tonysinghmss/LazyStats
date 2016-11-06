@@ -1,0 +1,30 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.tony.lazystats.fragments.StatsDisplay"
+    android:orientation="vertical">
+    <LinearLayout
+        android:id="@+id/statDispBtnRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/editText_dataValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="number"
+            android:hint="@string/dataValue"/>
+        <Button
+            android:id="@+id/btn_LogStat"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/register"
+            android:layout_weight="1"/>
+    </LinearLayout>
+    <com.jjoe64.graphview.GraphView
+        android:id="@+id/graphDisp"
+        android:layout_width="match_parent"
+        android:layout_height="450dip" />
+</LinearLayout>

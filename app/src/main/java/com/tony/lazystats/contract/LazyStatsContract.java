@@ -26,8 +26,21 @@ public class LazyStatsContract {
         public static final String COL_CREATED_ON = "createdOn";
         public static final Uri CONTENT_URI = Uri.parse(SCHEME + "://" + AUTHORITY+"/"+TABLE_NAME);
         public static final String MIME_TYPE_ROWS =
-                "vnd.android.cursor.dir/vnd.com.tony.lazystats.provider.Statistics";
+                "vnd.android.cursor.dir/vnd."+AUTHORITY+"."+TABLE_NAME;
         public static final String MIME_TYPE_SINGLE_ROW =
-                "vnd.android.cursor.item/vnd.com.tony.lazystats.provider.Statistics";
+                "vnd.android.cursor.item/vnd."+AUTHORITY+"."+TABLE_NAME;
+    }
+
+    public static class StatsData implements BaseColumns{
+        public static final String TABLE_NAME = "StatsData";
+        public static final String COL_STAT_FK = "statsFkey";
+        public static final String COL_DATA = "dataCol";
+        public static final String COL_CREATED_ON = "createdOn";
+        public static final Uri CONTENT_URI = Uri.parse(SCHEME + "://" + AUTHORITY+"/"+TABLE_NAME);
+        public static final String MIME_TYPE_ROWS =
+                "vnd.android.cursor.dir/vnd."+AUTHORITY+"."+TABLE_NAME;
+        public static final String MIME_TYPE_SINGLE_ROW =
+                "vnd.android.cursor.item/vnd."+AUTHORITY+"."+TABLE_NAME;
+
     }
 }

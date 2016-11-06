@@ -71,7 +71,7 @@ public class CreateFragment extends Fragment implements View.OnClickListener{
         Date date = new Date();
         fields.put(LazyStatsContract.Statistics.COL_CREATED_ON, dateFormat.format(date));
         try {
-            getActivity().getContentResolver().insert(ContentUris.withAppendedId(LazyStatsContract.Statistics.CONTENT_URI, 1), fields);
+            getActivity().getContentResolver().insert(LazyStatsContract.Statistics.CONTENT_URI,fields);
             // After successful creation of a statistic
             statName.clear();
             statRemark.clear();

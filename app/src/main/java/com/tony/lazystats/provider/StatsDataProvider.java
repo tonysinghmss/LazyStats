@@ -22,13 +22,16 @@ import com.tony.lazystats.contract.LazyStatsContract;
 public class StatsDataProvider extends ContentProvider{
     public static final String LOG_TAG = StatsDataProvider.class.getSimpleName();
     // Indicates that the incoming query is for Stat creation
-    public static final int MULTIROW_STATS = 1;
-    public static final int UNIROW_STATS = 2;
+    public static final int STATS_LIST = 1;
+    public static final int STATS = 2;
+    public static final int STATS_DATA_LIST = 3;
+    public static final int STATS_DATA = 4;
     public static final int INVALID_URI = -1;
 
     private static final String COMMA_SEP = ",";
     private static final String CREATE_TABLE = "CREATE TABLE ";
     private static final String TEXT_TYPE = "TEXT";
+    private static final String INTEGER_TYPE = "INTEGER";
     private static final String PRIMARY_KEY_TYPE = "INTEGER PRIMARY KEY";
     public static final String SQL_CREATE_STATS =
             CREATE_TABLE + LazyStatsContract.Statistics.TABLE_NAME + "(" +
@@ -40,6 +43,14 @@ public class StatsDataProvider extends ContentProvider{
                     LazyStatsContract.Statistics.COL_CREATED_ON +" "+TEXT_TYPE+")";
     public static final String SQL_DROP_STATS =
             "DROP TABLE IF EXISTS "+ LazyStatsContract.Statistics.TABLE_NAME;
+    public static final String SQL_CREATE_STATSDATA =
+            CREATE_TABLE + LazyStatsContract.StatsData.TABLE_NAME + "("+
+                    LazyStatsContract.StatsData._ID+" "+PRIMARY_KEY_TYPE+COMMA_SEP+
+                    LazyStatsContract.StatsData.COL_STAT_FK+" "+INTEGER_TYPE+" "+"NOT NULL"+COMMA_SEP+
+                    LazyStatsContract.StatsData.COL_DATA+" "+INTEGER_TYPE+COMMA_SEP+
+                    LazyStatsContract.StatsData.COL_CREATED_ON+" "+TEXT_TYPE+")";
+    public static final String SQL_DROP_STATS_DATA =
+            "DROP TABLE IF EXISTS "+LazyStatsContract.StatsData.TABLE_NAME;
 
     // Defines an helper object for the backing database
     private SQLiteOpenHelper mHelper;
@@ -71,26 +82,35 @@ public class StatsDataProvider extends ContentProvider{
         sUriMatcher.addURI(
                 LazyStatsContract.AUTHORITY,
                 LazyStatsContract.Statistics.TABLE_NAME,
-                MULTIROW_STATS);
+                STATS_LIST);
         // Sets up UNIROW_STATS as code to represent URI for single row of Statistics table
         sUriMatcher.addURI(
                 LazyStatsContract.AUTHORITY,
                 LazyStatsContract.Statistics.TABLE_NAME+"/#",
-                UNIROW_STATS);
+                STATS);
+        sUriMatcher.addURI(
+                LazyStatsContract.AUTHORITY,
+                LazyStatsContract.StatsData.TABLE_NAME,
+                STATS_DATA_LIST);
+        sUriMatcher.addURI(
+                LazyStatsContract.AUTHORITY,
+                LazyStatsContract.StatsData.TABLE_NAME+"/#",
+                STATS_DATA);
 
         // Specifies a custom MIME type for a multiple rows of Statistics table
         sMimeTypes.put(
-                MULTIROW_STATS,
-                "vnd.android.cursor.dir/vnd." +
-                        LazyStatsContract.AUTHORITY + "." +
-                        LazyStatsContract.Statistics.TABLE_NAME);
+                STATS_LIST,
+                LazyStatsContract.Statistics.MIME_TYPE_ROWS);
         // Specifies a custom MIME type for a single row of Statistics table
         sMimeTypes.put(
-                UNIROW_STATS,
-                "vnd.android.cursor.item/vnd." +
-                        LazyStatsContract.AUTHORITY + "." +
-                        LazyStatsContract.Statistics.TABLE_NAME);
-
+                STATS,
+                LazyStatsContract.Statistics.MIME_TYPE_SINGLE_ROW);
+        sMimeTypes.put(
+                STATS_DATA_LIST,
+                LazyStatsContract.StatsData.MIME_TYPE_ROWS);
+        sMimeTypes.put(
+                STATS_DATA,
+                LazyStatsContract.StatsData.MIME_TYPE_SINGLE_ROW);
 
     }
 
@@ -109,12 +129,15 @@ public class StatsDataProvider extends ContentProvider{
 
         private void dropTables(SQLiteDatabase db) {
             // If the table doesn't exist, don't throw an error
+            db.execSQL(SQL_DROP_STATS_DATA);
             db.execSQL(SQL_DROP_STATS);
+
         }
         @Override
         public void onCreate(SQLiteDatabase db) {
             // Creates the tables in the backing database for this provider
             db.execSQL(SQL_CREATE_STATS);
+            db.execSQL(SQL_CREATE_STATSDATA);
         }
         /**
          * Handles upgrading the database from a previous version. Drops the old tables and creates
@@ -179,24 +202,54 @@ public class StatsDataProvider extends ContentProvider{
         Log.d(LOG_TAG, "Inside StatsDataProvider query");
         SQLiteDatabase db = mHelper.getReadableDatabase();
         switch (sUriMatcher.match(uri)){
-            case MULTIROW_STATS:
+            case STATS_LIST:
                 if(TextUtils.isEmpty(sortOrder)) sortOrder = "_ID ASC";
-                break;
-            case UNIROW_STATS:
+                return db.query(
+                        LazyStatsContract.Statistics.TABLE_NAME,    //Table name
+                        projection,                                 //Columns to be shown
+                        selection,                                  //Filter clause
+                        selectionArgs,                              //Filter arguments
+                        null,                                       //group by clause
+                        null,                                       //having clause
+                        sortOrder                                   //order by clause
+                );
+            case STATS:
                 selection = selection + "_ID = "+uri.getLastPathSegment();
-                break;
+                return db.query(
+                        LazyStatsContract.Statistics.TABLE_NAME,    //Table name
+                        projection,                                 //Columns to be shown
+                        selection,                                  //Filter clause
+                        selectionArgs,                              //Filter arguments
+                        null,                                       //group by clause
+                        null,                                       //having clause
+                        sortOrder                                   //order by clause
+                );
+            case STATS_DATA_LIST:
+                if(TextUtils.isEmpty(sortOrder)) sortOrder = "_ID ASC";
+                return db.query(
+                        LazyStatsContract.StatsData.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+            case STATS_DATA:
+                selection = selection + "_ID = "+uri.getLastPathSegment();
+                return db.query(
+                        LazyStatsContract.StatsData.TABLE_NAME,    //Table name
+                        projection,                                 //Columns to be shown
+                        selection,                                  //Filter clause
+                        selectionArgs,                              //Filter arguments
+                        null,                                       //group by clause
+                        null,                                       //having clause
+                        sortOrder                                   //order by clause
+                );
             default:
                 throw new IllegalArgumentException("Query -- Invalid URI:" + uri);
         }
-        return db.query(
-                LazyStatsContract.Statistics.TABLE_NAME,    //Table name
-                projection,                                 //Columns to be shown
-                selection,                                  //Filter clause
-                selectionArgs,                              //Filter arguments
-                null,                                       //group by clause
-                null,                                       //having clause
-                sortOrder                                   //order by clause
-        );
+
     }
 
     /**
@@ -216,10 +269,9 @@ public class StatsDataProvider extends ContentProvider{
     public Uri insert(Uri uri, ContentValues values) {
         Log.d(LOG_TAG, "Inside StatsDataProvider insert");
         switch (sUriMatcher.match(uri)){
-            case UNIROW_STATS:
+            case STATS_LIST:
                 // Creates a writeable database or gets one from cache
                 SQLiteDatabase localSQLiteDatabase = mHelper.getWritableDatabase();
-
                 // Inserts the row into the table and returns the new row's _id value
                 long id = localSQLiteDatabase.insertOrThrow(
                         LazyStatsContract.Statistics.TABLE_NAME,
@@ -231,10 +283,24 @@ public class StatsDataProvider extends ContentProvider{
                     Log.d(LOG_TAG, "Row inserted with id :"+id);
                     getContext().getContentResolver().notifyChange(uri, null);
                     return Uri.withAppendedPath(uri, Long.toString(id));
-                } else {
+                }/* else {
                     throw new UnsupportedOperationException("Failed to insert:" + uri);
+                }*/
+                break;
+            case STATS_DATA_LIST:
+                localSQLiteDatabase = mHelper.getWritableDatabase();
+                id = localSQLiteDatabase.insert(
+                        LazyStatsContract.StatsData.TABLE_NAME,
+                        LazyStatsContract.StatsData.COL_DATA,
+                        values
+                );
+                if(-1 != id){
+                    Log.d(LOG_TAG, "Row inserted with id :"+id);
+                    getContext().getContentResolver().notifyChange(uri, null);
+                    return Uri.withAppendedPath(uri,Long.toString(id));
                 }
-            case MULTIROW_STATS:
+                break;
+            default:
                 throw new IllegalArgumentException("Insert: Invalid URI" + uri);
         }
         return null;
@@ -245,26 +311,27 @@ public class StatsDataProvider extends ContentProvider{
         Log.d(LOG_TAG, "Inside StatsDataprovider delete");
         int deleteCount = 0;
         switch (sUriMatcher.match(uri)){
-            case UNIROW_STATS:
+            case STATS:
                 // Creates a writeable database or gets one from cache
                 SQLiteDatabase localSQLiteDatabase = mHelper.getWritableDatabase();
                 deleteCount = localSQLiteDatabase.delete(LazyStatsContract.Statistics.TABLE_NAME, selection, selectionArgs);
                 break;
-            case MULTIROW_STATS:
+            case STATS_DATA_LIST:
+                localSQLiteDatabase = mHelper.getWritableDatabase();
+                deleteCount = localSQLiteDatabase.delete(LazyStatsContract.StatsData.TABLE_NAME, selection, selectionArgs);
+                break;
+            default:
                 throw new UnsupportedOperationException("Delete multiple rows -- unsupported operation " + uri);
-
         }
         return deleteCount;
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        switch (sUriMatcher.match(uri)){
-            case MULTIROW_STATS:
+        /*switch (sUriMatcher.match(uri)){
+            default:
                 throw new IllegalArgumentException("Update: Invalid URI: " + uri);
-            case UNIROW_STATS:
-                throw new IllegalArgumentException("Update: Invalid URI: " + uri);
-        }
+        }*/
         return -1;
     }
 

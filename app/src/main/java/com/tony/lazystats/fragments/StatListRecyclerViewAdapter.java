@@ -2,23 +2,25 @@ package com.tony.lazystats.fragments;
 
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.tony.lazystats.R;
 import com.tony.lazystats.model.Statistic;
 
 import java.util.List;
 
-public class MyStatRecyclerViewAdapter extends RecyclerView.Adapter<MyStatRecyclerViewAdapter.ViewHolder> {
+public class StatListRecyclerViewAdapter extends RecyclerView.Adapter<StatListRecyclerViewAdapter.ViewHolder> {
 
-    private List<Statistic> mValues;
+    private final List<Statistic> mValues;
     private final StatListFragment.OnListFragmentInteractionListener mListener;
+    private static final int ITEM_DETAIL = 1;
+    private static final int DELETE_ITEM = 2;
 
-    public MyStatRecyclerViewAdapter(List<Statistic> items, StatListFragment.OnListFragmentInteractionListener listener) {
+    public StatListRecyclerViewAdapter(List<Statistic> items, StatListFragment.OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -31,7 +33,7 @@ public class MyStatRecyclerViewAdapter extends RecyclerView.Adapter<MyStatRecycl
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.mItem = mValues.get(position);
         holder.mNameView.setText(mValues.get(position).getName());
         holder.mRemarkView.setText(mValues.get(position).getRemark());
@@ -42,8 +44,19 @@ public class MyStatRecyclerViewAdapter extends RecyclerView.Adapter<MyStatRecycl
                 if (null != mListener) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    mListener.onStatListFragmentInteraction(holder.mItem);
+                    mListener.onStatListFragmentInteraction(holder.mItem, ITEM_DETAIL);
                 }
+            }
+        });
+
+        holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                mValues.remove(position);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, getItemCount());
+                mListener.onStatListFragmentInteraction(holder.mItem, DELETE_ITEM);
+                return true;
             }
         });
     }
@@ -64,6 +77,7 @@ public class MyStatRecyclerViewAdapter extends RecyclerView.Adapter<MyStatRecycl
             mView = view;
             mNameView = (TextView) view.findViewById(R.id.name);
             mRemarkView = (TextView) view.findViewById(R.id.remark);
+
         }
 
         @Override

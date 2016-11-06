@@ -242,7 +242,19 @@ public class StatsDataProvider extends ContentProvider{
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        throw new UnsupportedOperationException("Delete -- unsupported operation " + uri);
+        Log.d(LOG_TAG, "Inside StatsDataprovider delete");
+        int deleteCount = 0;
+        switch (sUriMatcher.match(uri)){
+            case UNIROW_STATS:
+                // Creates a writeable database or gets one from cache
+                SQLiteDatabase localSQLiteDatabase = mHelper.getWritableDatabase();
+                deleteCount = localSQLiteDatabase.delete(LazyStatsContract.Statistics.TABLE_NAME, selection, selectionArgs);
+                break;
+            case MULTIROW_STATS:
+                throw new UnsupportedOperationException("Delete multiple rows -- unsupported operation " + uri);
+
+        }
+        return deleteCount;
     }
 
     @Override

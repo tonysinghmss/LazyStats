@@ -29,7 +29,8 @@ public class StatListFragment extends Fragment implements LoaderManager.LoaderCa
     private int mColumnCount = 1;
     private List<Statistic> mStatList = new ArrayList<>();
     private OnListFragmentInteractionListener mListener;
-    private MyStatRecyclerViewAdapter mRecyclerViewAdapter;
+    private StatListRecyclerViewAdapter mRecyclerViewAdapter;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -53,7 +54,7 @@ public class StatListFragment extends Fragment implements LoaderManager.LoaderCa
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
-        getLoaderManager().initLoader(1,null,this);
+        getLoaderManager().initLoader(1, null, this);
 
     }
 
@@ -72,7 +73,7 @@ public class StatListFragment extends Fragment implements LoaderManager.LoaderCa
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            mRecyclerViewAdapter = new MyStatRecyclerViewAdapter(mStatList, mListener);
+            mRecyclerViewAdapter = new StatListRecyclerViewAdapter(mStatList, mListener);
             recyclerView.setAdapter(mRecyclerViewAdapter);
         }
         return view;
@@ -107,8 +108,7 @@ public class StatListFragment extends Fragment implements LoaderManager.LoaderCa
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onStatListFragmentInteraction(Statistic item);
+        void onStatListFragmentInteraction(Statistic item, int clickId);
     }
 
     /* START LoaderManager callback logic */
@@ -120,9 +120,9 @@ public class StatListFragment extends Fragment implements LoaderManager.LoaderCa
     };
 
     @Override
-    public Loader<Cursor> onCreateLoader(int loaderId, Bundle args){
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
         Log.d(LOG_TAG, "Inside onCreateLoader");
-        switch (loaderId){
+        switch (loaderId) {
             case 1:
                 return new CursorLoader(getActivity(), LazyStatsContract.Statistics.CONTENT_URI,
                         STAT_LIST_PROJECTION,               // List of columns to fetch
@@ -136,28 +136,27 @@ public class StatListFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data){
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         Log.d(LOG_TAG, "Inside onLoadFinished");
-        if(mStatList==null){
+        if (mStatList == null) {
             mStatList = new ArrayList<>();
         }
-        while (data.moveToNext()){
+        while (data.moveToNext()) {
             Statistic s = new Statistic();
             s.setStatId(data.getString(data.getColumnIndex(LazyStatsContract.Statistics._ID)));
             s.setName(data.getString(data.getColumnIndex(LazyStatsContract.Statistics.COL_NAME)));
             s.setRemark(data.getString(data.getColumnIndex(LazyStatsContract.Statistics.COL_REMARK)));
             s.setCreatedOn(data.getString(data.getColumnIndex(LazyStatsContract.Statistics.COL_CREATED_ON)));
-            Log.d(LOG_TAG, s.getName());
+            //Log.d(LOG_TAG, s.getName());
             mStatList.add(s);
         }
-        Log.d(LOG_TAG, ""+mStatList.size());
+        //Log.d(LOG_TAG, ""+mStatList.size());
         mRecyclerViewAdapter.notifyDataSetChanged();
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader){
+    public void onLoaderReset(Loader<Cursor> loader) {
         mStatList = null;
     }
     /* END LoaderManager callbacklogic */
-
 }

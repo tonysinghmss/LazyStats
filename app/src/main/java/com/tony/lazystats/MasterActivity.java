@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -29,6 +30,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.tony.lazystats.contract.LazyStatsContract;
 import com.tony.lazystats.fragments.CreateFragment;
 import com.tony.lazystats.fragments.DefaultFragment;
 import com.tony.lazystats.fragments.StatListFragment;
@@ -60,6 +62,9 @@ public class MasterActivity extends AppCompatActivity
     private TextView profileDisplayName, profileEmailId;
 
     private Boolean exit = false;
+
+    private static final int ITEM_DETAIL = 1;
+    private static final int DELETE_ITEM = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -285,8 +290,22 @@ public class MasterActivity extends AppCompatActivity
     }
 
     @Override
-    public void onStatListFragmentInteraction(Statistic item){
+    public void onStatListFragmentInteraction(Statistic item, int clickId){
 
+        switch (clickId){
+            case ITEM_DETAIL: //TODO: drill down to the related fragment
+                Toast.makeText(this, item.getName()+" clicked.", Toast.LENGTH_SHORT).show();
+                break;
+            case DELETE_ITEM: //TODO: Ask the user to delete the item
+                String[] selectionArgs = {item.getStatId()};
+                getContentResolver().delete(
+                        ContentUris.withAppendedId(LazyStatsContract.Statistics.CONTENT_URI,Long.valueOf(item.getStatId())),
+                        LazyStatsContract.Statistics._ID +" = ? ",
+                        selectionArgs
+                        );
+                Toast.makeText(this, item.getName()+" deleted.", Toast.LENGTH_SHORT).show();
+                break;
+        }
     }
 
 }

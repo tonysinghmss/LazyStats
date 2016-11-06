@@ -1,6 +1,7 @@
 package com.tony.lazystats.fragments;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteException;
@@ -71,6 +72,10 @@ public class CreateFragment extends Fragment implements View.OnClickListener{
         fields.put(LazyStatsContract.Statistics.COL_CREATED_ON, dateFormat.format(date));
         try {
             getActivity().getContentResolver().insert(ContentUris.withAppendedId(LazyStatsContract.Statistics.CONTENT_URI, 1), fields);
+            // After successful creation of a statistic
+            statName.clear();
+            statRemark.clear();
+            Toast.makeText(getActivity(), statName+" created.", Toast.LENGTH_SHORT).show();
         }catch (SQLiteException e){
             Toast.makeText(getActivity(), "This statistics already exists!! Try with a new name.", Toast.LENGTH_SHORT).show();
         }

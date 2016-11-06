@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -34,11 +35,12 @@ import com.tony.lazystats.contract.LazyStatsContract;
 import com.tony.lazystats.fragments.CreateFragment;
 import com.tony.lazystats.fragments.DefaultFragment;
 import com.tony.lazystats.fragments.StatListFragment;
+import com.tony.lazystats.fragments.StatsDisplay;
 import com.tony.lazystats.model.Statistic;
 
 public class MasterActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener,
-        StatListFragment.OnListFragmentInteractionListener{
+        StatListFragment.OnStatListInteractionListener, StatsDisplay.OnStatsDisplayInteractionListener{
 
     private static final String TAG = MasterActivity.class.getSimpleName();
 
@@ -294,7 +296,11 @@ public class MasterActivity extends AppCompatActivity
 
         switch (clickId){
             case ITEM_DETAIL: //TODO: drill down to the related fragment
-                Toast.makeText(this, item.getName()+" clicked.", Toast.LENGTH_SHORT).show();
+                Fragment fragment = StatsDisplay.newInstance(item.getStatId());
+                FragmentManager fragmentManager = getFragmentManager();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.frame_container, fragment).commit();
+
                 break;
             case DELETE_ITEM: //TODO: Ask the user to delete the item
                 String[] selectionArgs = {item.getStatId()};
@@ -308,4 +314,8 @@ public class MasterActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public void onStatsDisplayInteraction(Uri uri){
+        //TODO: Use it to interact with StatsDisplay
+    }
 }

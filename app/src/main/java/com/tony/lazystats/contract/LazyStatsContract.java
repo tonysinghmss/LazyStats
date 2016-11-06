@@ -32,7 +32,7 @@ public class LazyStatsContract {
     }
 
     public static class StatsData implements BaseColumns{
-        public static final String TABLE_NAME = "StatsData";
+        public static final String TABLE_NAME = "StatData";
         public static final String COL_STAT_FK = "statsFkey";
         public static final String COL_DATA = "dataCol";
         public static final String COL_CREATED_ON = "createdOn";

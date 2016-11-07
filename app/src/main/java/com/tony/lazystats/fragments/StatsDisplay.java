@@ -196,6 +196,9 @@ public class StatsDisplay extends Fragment implements LoaderManager.LoaderCallba
         series.setAnimated(true);
         series.setDrawDataPoints(true);
         series.setTitle(mStatName);
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(statsData.size());
         graph.getLegendRenderer().setVisible(true);
         graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
     }

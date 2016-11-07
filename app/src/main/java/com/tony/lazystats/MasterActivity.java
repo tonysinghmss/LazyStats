@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -36,6 +37,7 @@ import com.tony.lazystats.fragments.CreateFragment;
 import com.tony.lazystats.fragments.DefaultFragment;
 import com.tony.lazystats.fragments.StatListFragment;
 import com.tony.lazystats.fragments.StatsDisplay;
+import com.tony.lazystats.model.StatData;
 import com.tony.lazystats.model.Statistic;
 
 public class MasterActivity extends AppCompatActivity
@@ -67,6 +69,7 @@ public class MasterActivity extends AppCompatActivity
 
     private static final int ITEM_DETAIL = 1;
     private static final int DELETE_ITEM = 2;
+    private static final int INSERT_DATA =1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -296,14 +299,19 @@ public class MasterActivity extends AppCompatActivity
 
         switch (clickId){
             case ITEM_DETAIL: //TODO: drill down to the related fragment
-                Fragment fragment = StatsDisplay.newInstance(item.getStatId());
+                Fragment fragment = StatsDisplay.newInstance(item.getStatId(), item.getName());
                 FragmentManager fragmentManager = getFragmentManager();
                 fragmentManager.beginTransaction()
                         .replace(R.id.frame_container, fragment).commit();
-
                 break;
             case DELETE_ITEM: //TODO: Ask the user to delete the item
                 String[] selectionArgs = {item.getStatId()};
+                //Delete child tables first
+                getContentResolver().delete(
+                        LazyStatsContract.StatsData.CONTENT_URI,
+                        LazyStatsContract.StatsData.COL_STAT_FK+" = ?",
+                        selectionArgs
+                        );
                 getContentResolver().delete(
                         ContentUris.withAppendedId(LazyStatsContract.Statistics.CONTENT_URI,Long.valueOf(item.getStatId())),
                         LazyStatsContract.Statistics._ID +" = ? ",
@@ -315,7 +323,17 @@ public class MasterActivity extends AppCompatActivity
     }
 
     @Override
-    public void onStatsDisplayInteraction(Uri uri){
-        //TODO: Use it to interact with StatsDisplay
+    public void onStatsDisplayInteraction(StatData val, int clickId){
+        switch (clickId){
+            case INSERT_DATA:
+                ContentValues statData = new ContentValues();
+                statData.put(LazyStatsContract.StatsData.COL_STAT_FK, val.getStatFk());
+                statData.put(LazyStatsContract.StatsData.COL_DATA, val.getStatData());
+                statData.put(LazyStatsContract.StatsData.COL_CREATED_ON, val.getCreatedOn());
+                getContentResolver().insert(LazyStatsContract.StatsData.CONTENT_URI, statData);
+                break;
+
+        }
+
     }
 }

@@ -13,4 +13,5 @@ Below is the list of components I have used till now in this app:
 <li>LoaderManager callbacks with CursorLoader.</li>
 <li>RecyclerView Adapter.</li>
 <li>Content Provider.</li>
+<li>GraphView</li>
 </ul>

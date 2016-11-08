@@ -20,18 +20,21 @@ import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.LegendRenderer;
+import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.tony.lazystats.R;
 import com.tony.lazystats.contract.LazyStatsContract;
 import com.tony.lazystats.model.StatData;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class StatsDisplay extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener{
+    private static final String LOG_TAG = StatsDisplay.class.getSimpleName();
     private static final String ARG_STAT_ID = "statId";
     private static final String ARG_STAT_NAME = "statName";
 
@@ -178,27 +181,42 @@ public class StatsDisplay extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         List<DataPoint> statsData = new ArrayList<>();
-        long x = 0;
+        Date d1 = null;
+        Date dn = null;
+        boolean first = false;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         while (data.moveToNext()){
-            /*StatData sd = new StatData();
-            sd.setStatDataId(data.getString(data.getColumnIndex(LazyStatsContract.StatsData._ID)));
-            sd.setStatData(data.getLong(data.getColumnIndex(LazyStatsContract.StatsData.COL_DATA)));
-            sd.setCreatedOn(data.getString(data.getColumnIndex(LazyStatsContract.StatsData.COL_CREATED_ON)));
-            statsData.add(sd);*/
-            long y = data.getLong(data.getColumnIndex(LazyStatsContract.StatsData.COL_DATA));
-            DataPoint dataPoint = new DataPoint(x, y);
-            //series.appendData(dataPoint, true, MAX_DATA_POINT);
-            statsData.add(dataPoint);
-            x++;
+            String d = data.getString(data.getColumnIndex(LazyStatsContract.StatsData.COL_CREATED_ON));
+            try {
+                Date xd = sdf.parse(d);
+                if(!first){
+                    d1 = xd;
+                    first = true;
+                }
+                else{
+                    dn = xd;
+                }
+                long y = data.getLong(data.getColumnIndex(LazyStatsContract.StatsData.COL_DATA));
+                DataPoint dataPoint = new DataPoint(xd.getTime(), y);
+                statsData.add(dataPoint);
+            }catch (ParseException e){
+                Log.e(LOG_TAG, " Error while parsing date for X axis");
+            }
         }
         series.resetData(statsData.toArray(new DataPoint[statsData.size()]));
         series.setDrawBackground(true);
         series.setAnimated(true);
         series.setDrawDataPoints(true);
         series.setTitle(mStatName);
+        //set the X axis label formatter
+        graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(getActivity()));
+        graph.getGridLabelRenderer().setNumHorizontalLabels(statsData.size());
+        //Set manual X axis bounds
+        if(d1 != null) graph.getViewport().setMinX(d1.getTime());
+        if (dn != null) graph.getViewport().setMaxX(dn.getTime());
         graph.getViewport().setXAxisBoundsManual(true);
-        graph.getViewport().setMinX(0);
-        graph.getViewport().setMaxX(statsData.size());
+        graph.getGridLabelRenderer().setHumanRounding(false);
+
         graph.getLegendRenderer().setVisible(true);
         graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
     }

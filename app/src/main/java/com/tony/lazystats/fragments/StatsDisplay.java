@@ -94,8 +94,12 @@ public class StatsDisplay extends Fragment implements LoaderManager.LoaderCallba
         graph.getViewport().setScrollable(true);
         graph.getViewport().setScalableY(true);
         graph.getViewport().setScrollableY(true);
-        //graph.getGridLabelRenderer().setNumHorizontalLabels();
+        graph.getGridLabelRenderer().setHorizontalAxisTitle("Date");
+        graph.getGridLabelRenderer().setVerticalAxisTitle("Value");
         graph.addSeries(series);
+        series.setDrawBackground(true);
+        series.setAnimated(true);
+        series.setDrawDataPoints(true);
         mStatDataValue = (EditText) view.findViewById(R.id.editText_dataValue);
         Button btn = (Button) view.findViewById(R.id.btn_LogStat);
         btn.setOnClickListener(this);
@@ -204,13 +208,13 @@ public class StatsDisplay extends Fragment implements LoaderManager.LoaderCallba
             }
         }
         series.resetData(statsData.toArray(new DataPoint[statsData.size()]));
-        series.setDrawBackground(true);
-        series.setAnimated(true);
-        series.setDrawDataPoints(true);
+
         series.setTitle(mStatName);
+
         //set the X axis label formatter
         graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(getActivity()));
-        graph.getGridLabelRenderer().setNumHorizontalLabels(statsData.size());
+        graph.getGridLabelRenderer().setNumHorizontalLabels(3);
+
         //Set manual X axis bounds
         if(d1 != null) graph.getViewport().setMinX(d1.getTime());
         if (dn != null) graph.getViewport().setMaxX(dn.getTime());

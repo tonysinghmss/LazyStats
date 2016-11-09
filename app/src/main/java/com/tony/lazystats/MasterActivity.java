@@ -183,8 +183,13 @@ public class MasterActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+            if(getFragmentManager().getBackStackEntryCount()>0){
+                getFragmentManager().popBackStack();
+            }
         } else {
-            if(exit){
+            if(getFragmentManager().getBackStackEntryCount()>0){
+                getFragmentManager().popBackStack();
+            } else if(exit){
                 super.onBackPressed();
                 signOutBroadCast();
             }
@@ -256,7 +261,9 @@ public class MasterActivity extends AppCompatActivity
         if(fragment != null){
             FragmentManager fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction()
-                    .replace(R.id.frame_container, fragment).commit();
+                    .replace(R.id.frame_container, fragment)
+                    .addToBackStack(null)
+                    .commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -302,7 +309,9 @@ public class MasterActivity extends AppCompatActivity
                 Fragment fragment = StatsDisplay.newInstance(item.getStatId(), item.getName());
                 FragmentManager fragmentManager = getFragmentManager();
                 fragmentManager.beginTransaction()
-                        .replace(R.id.frame_container, fragment).commit();
+                        .replace(R.id.frame_container, fragment)
+                        .addToBackStack(null)
+                        .commit();
                 break;
             case DELETE_ITEM: //TODO: Ask the user to delete the item
                 String[] selectionArgs = {item.getStatId()};
